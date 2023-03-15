@@ -183,7 +183,12 @@ public class SystemFrame extends JFrame implements ChildFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             switch (e.getActionCommand()) {
-                case "calculate" -> SOLUTION_METHOD.iterationsCycle(data);
+                case "calculate" -> {
+                    data.setLeftBorder(Double.parseDouble(bordersField.getText().replace(",", ".").split(";")[0]));
+                    data.setRightBorder(Double.parseDouble(bordersField.getText().replace(",", ".").split(";")[1]));
+                    data.setAccuracy(Double.parseDouble(accuracyField.getText()));
+                    SOLUTION_METHOD.iterationsCycle(data);
+                }
                 case "back" -> {
                     dispose();
                     parent.setVisible(true);
@@ -194,7 +199,7 @@ public class SystemFrame extends JFrame implements ChildFrame {
         }
     }
 
-    private static class ValidateBorder extends InputVerifier {
+    private class ValidateBorder extends InputVerifier {
 
         private final JLabel errorLabel;
 
@@ -216,22 +221,27 @@ public class SystemFrame extends JFrame implements ChildFrame {
                     rightBorder = Double.parseDouble(values[0]);
                     leftBorder = Double.parseDouble(values[1]);
                 } catch (NumberFormatException e) {
+                    tool.calculateButton.setEnabled(false);
                     errorLabel.setText(ERROR_MESSAGE);
                     errorLabel.setVisible(true);
                     return false;
                 }
                 if (rightBorder != leftBorder) {
                     errorLabel.setVisible(false);
-                    return true;
                 }
+                if (accuracyField.isValidateRoot()) {
+                    tool.calculateButton.setEnabled(true);
+                }
+                return true;
             }
+            tool.calculateButton.setEnabled(false);
             errorLabel.setText(ERROR_MESSAGE);
             errorLabel.setVisible(true);
             return false;
         }
     }
 
-    private static class ValidateAccuracy extends InputVerifier {
+    private class ValidateAccuracy extends InputVerifier {
 
         private final JLabel errorLabel;
 
@@ -250,15 +260,20 @@ public class SystemFrame extends JFrame implements ChildFrame {
                 try {
                     value = Double.parseDouble(text.replace(",", "."));
                 } catch (NumberFormatException e) {
+                    tool.calculateButton.setEnabled(false);
                     errorLabel.setText(ERROR_MESSAGE);
                     errorLabel.setVisible(true);
                     return false;
                 }
                 if (value >= 0) {
                     errorLabel.setVisible(false);
-                    return true;
                 }
+                if (bordersField.isValidateRoot()) {
+                    tool.calculateButton.setEnabled(true);
+                }
+                return true;
             }
+            tool.calculateButton.setEnabled(false);
             errorLabel.setText(ERROR_MESSAGE);
             errorLabel.setVisible(true);
             return false;

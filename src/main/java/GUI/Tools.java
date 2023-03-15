@@ -19,6 +19,8 @@ public class Tools {
         return instance;
     }
 
+    public final JButton calculateButton = new JButton("Вычислить");
+
     public JPanel createRadioButton(String equation) {
         TeXFormula formula = new TeXFormula(equation);
         TeXIcon icon = formula.createTeXIcon(TeXConstants.STYLE_DISPLAY, 10);
@@ -35,8 +37,8 @@ public class Tools {
     public JPanel createControlButtons(ActionListener buttonsListener) {
         JPanel buttons = new JPanel(new GridLayout(1, 2, 5, 0));
 
-        JButton calculateButton = new JButton("Вычислить");
         calculateButton.setActionCommand("calculate");
+        calculateButton.setEnabled(false);
 
         JButton backButton = new JButton("Назад");
         backButton.setActionCommand("back");
