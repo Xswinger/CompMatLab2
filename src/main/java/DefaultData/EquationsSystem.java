@@ -2,6 +2,9 @@ package DefaultData;
 
 //TODO Найти способ адекватного вывода системы уравнений
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class EquationsSystem {
 
     private static final String FIRST_SYSTEM = "" +
@@ -28,6 +31,39 @@ public class EquationsSystem {
             "\\\\" +
             "\\end{cases}";
 
+    private static final Map[] firstSystemMapOfValues = new Map[] {new HashMap<String, Double>() {{
+        put("x^2", 0.1);
+        put("x", 1.0);
+        put("y^2", 0.2);
+        put("-", -0.3);
+    }}, new HashMap<String, Double>() {{
+        put("x^2", 0.2);
+        put("y", 1.0);
+        put("xy", 0.1);
+        put("-", -0.7);
+    }}};
+
+    private static final Map[] secondSystemMapOfValues = new Map[] {new HashMap<String, Double>() {{
+        put("x^2", 1.0);
+        put("y^2", 1.0);
+        put("-", -4.0);
+    }}, new HashMap<String, Double>() {{
+        put("x^2", -3.0);
+        put("y", 1.0);
+    }}};
+
+    private static final Map[] thirdSystemMapOfValues = new Map[] {new HashMap<String, Double>() {{
+        put("x^2", 1.0);
+        put("x", 1.0);
+        put("y^2", -1.0);
+        put("-", -0.15);
+    }}, new HashMap<String, Double>() {{
+        put("x^2", 1.0);
+        put("y", -1.0);
+        put("y^2", 1.0);
+        put("-", 0.17);
+    }}};
+
     public static String getFirstSystem() {return FIRST_SYSTEM;}
 
     public static String getSecondSystem() {
@@ -36,5 +72,17 @@ public class EquationsSystem {
 
     public static String getThirdSystem() {
         return THIRD_SYSTEM;
+    }
+
+    public static Map[] getFirstSystemMapOfValues() {
+        return firstSystemMapOfValues;
+    }
+
+    public static Map[] getSecondSystemMapOfValues() {
+        return secondSystemMapOfValues;
+    }
+
+    public static Map[] getThirdSystemMapOfValues() {
+        return thirdSystemMapOfValues;
     }
 }
