@@ -5,8 +5,6 @@ import Methods.AbstractClasses.SimpleIterationMethodAbs;
 
 public class SimpleIterationMethod extends SimpleIterationMethodAbs implements NonlinearEquationMethodInterface {
 
-    public static final String METHOD_NAME = "Метод простой итерации";
-
     @Override
     public void iterationsCycle(EquationData selection) {
 

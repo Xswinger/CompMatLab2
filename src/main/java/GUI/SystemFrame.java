@@ -3,6 +3,7 @@ package GUI;
 import DefaultData.EquationsSystem;
 import EquationData.EquationData;
 import GUI.Interfaces.ChildFrame;
+import Methods.AbstractClasses.SimpleIterationMethodAbs;
 import Methods.NonLinearEquations.NonlinearEquationMethodInterface;
 import Methods.NonLinearEquations.SimpleIterationMethod;
 
@@ -11,8 +12,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import static javax.swing.GroupLayout.Alignment.BASELINE;
-import static javax.swing.GroupLayout.Alignment.LEADING;
+import static javax.swing.GroupLayout.Alignment.*;
 
 public class SystemFrame extends JFrame implements ChildFrame {
     private static final Tools tool = Tools.getInstance();
@@ -24,6 +24,10 @@ public class SystemFrame extends JFrame implements ChildFrame {
     private static final String DEFAULT_METHOD = "Метод простой итерации";
 
     private static final String HEADER_TEXT = "Решение систем нелинейных уравнений";
+
+    private final JTextField bordersField = new JTextField("a;b");
+
+    private final JTextField accuracyField = new JTextField("x>0");
 
     private static final NonlinearEquationMethodInterface SOLUTION_METHOD = new SimpleIterationMethod();
 
@@ -65,6 +69,8 @@ public class SystemFrame extends JFrame implements ChildFrame {
         group.add((AbstractButton) secondRadioButtonWrapper.getComponent(0));
         group.add((AbstractButton) thirdRadioButtonWrapper.getComponent(0));
 
+        ((AbstractButton) firstRadioButtonWrapper.getComponent(0)).setSelected(true);
+
         radioButtonsWrapper.add(firstRadioButtonWrapper);
         radioButtonsWrapper.add(secondRadioButtonWrapper);
         radioButtonsWrapper.add(thirdRadioButtonWrapper);
@@ -82,43 +88,61 @@ public class SystemFrame extends JFrame implements ChildFrame {
     public JPanel createFields() {
         JPanel mainWrapper = new JPanel();
 
-        GroupLayout layout = new GroupLayout(mainWrapper);
-        mainWrapper.setLayout(layout);
-        layout.setAutoCreateGaps(true);
-        layout.setAutoCreateContainerGaps(true);
-
+        GroupLayout fieldsLayout = new GroupLayout(mainWrapper);
+        mainWrapper.setLayout(fieldsLayout);
+        fieldsLayout.setAutoCreateGaps(true);
+        fieldsLayout.setAutoCreateContainerGaps(true);
 
         JLabel methodTitle = new JLabel("Метод решения:");
         JLabel bordersTitle = new JLabel("Введите границы начального приближения:");
         JLabel accuracyTitle = new JLabel("Введите точность:");
 
         JLabel defaultMethod = new JLabel(DEFAULT_METHOD);
-        JTextField bordersField = new JTextField();
-        JTextField accuracyField = new JTextField();
 
-        layout.setHorizontalGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(LEADING)
-                        .addComponent(methodTitle)
-                        .addComponent(bordersTitle)
-                        .addComponent(accuracyTitle)
-                )
-                .addGroup(layout.createParallelGroup(LEADING)
-                        .addComponent(defaultMethod)
-                        .addComponent(bordersField)
-                        .addComponent(accuracyField)
-                )
+        bordersField.setName("borders");
+        accuracyField.setName("accuracy");
+
+        JLabel errorBorderLabel = new JLabel("");
+        errorBorderLabel.setForeground(Color.RED);
+        errorBorderLabel.setVisible(false);
+        ValidateBorder validateBorder = new ValidateBorder(errorBorderLabel);
+
+        JLabel errorAccuracyLabel = new JLabel("");
+        errorAccuracyLabel.setForeground(Color.RED);
+        errorAccuracyLabel.setVisible(false);
+        ValidateAccuracy validateAccuracy = new ValidateAccuracy(errorAccuracyLabel);
+
+        bordersField.setInputVerifier(validateBorder);
+        accuracyField.setInputVerifier(validateAccuracy);
+
+        fieldsLayout.setHorizontalGroup(fieldsLayout.createParallelGroup(CENTER)
+                .addGroup(fieldsLayout.createSequentialGroup()
+                        .addGroup(fieldsLayout.createParallelGroup(LEADING)
+                                .addComponent(methodTitle)
+                                .addComponent(bordersTitle)
+                                .addComponent(accuracyTitle)
+                        )
+                        .addGroup(fieldsLayout.createParallelGroup(LEADING)
+                                .addComponent(defaultMethod)
+                                .addComponent(bordersField)
+                                .addComponent(accuracyField)
+                        ))
+                .addComponent(errorBorderLabel)
+                .addComponent(errorAccuracyLabel)
         );
 
-        layout.setVerticalGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(BASELINE)
+        fieldsLayout.setVerticalGroup(fieldsLayout.createSequentialGroup()
+                .addGroup(fieldsLayout.createParallelGroup(BASELINE)
                         .addComponent(methodTitle)
                         .addComponent(defaultMethod))
-                .addGroup(layout.createParallelGroup(BASELINE)
+                .addGroup(fieldsLayout.createParallelGroup(BASELINE)
                         .addComponent(bordersTitle)
                         .addComponent(bordersField))
-                .addGroup(layout.createParallelGroup(BASELINE)
+                .addGroup(fieldsLayout.createParallelGroup(BASELINE)
                         .addComponent(accuracyTitle)
                         .addComponent(accuracyField))
+                .addComponent(errorBorderLabel)
+                .addComponent(errorAccuracyLabel)
         );
 
         return mainWrapper;
@@ -167,6 +191,77 @@ public class SystemFrame extends JFrame implements ChildFrame {
                 default -> {
                 }
             }
+        }
+    }
+
+    private static class ValidateBorder extends InputVerifier {
+
+        private final JLabel errorLabel;
+
+        private static final String ERROR_MESSAGE = "Введено неверное значение границы";
+
+        public ValidateBorder(JLabel errorLabel) {
+            this.errorLabel = errorLabel;
+        }
+
+        @Override
+        public boolean verify(JComponent input) {
+            JTextField textField = (JTextField) input;
+            String text = textField.getText();
+            if (text != null && !text.trim().equals("")) {
+                String[] values = text.replace(",", ".").split(";");
+                double rightBorder;
+                double leftBorder;
+                try {
+                    rightBorder = Double.parseDouble(values[0]);
+                    leftBorder = Double.parseDouble(values[1]);
+                } catch (NumberFormatException e) {
+                    errorLabel.setText(ERROR_MESSAGE);
+                    errorLabel.setVisible(true);
+                    return false;
+                }
+                if (rightBorder != leftBorder) {
+                    errorLabel.setVisible(false);
+                    return true;
+                }
+            }
+            errorLabel.setText(ERROR_MESSAGE);
+            errorLabel.setVisible(true);
+            return false;
+        }
+    }
+
+    private static class ValidateAccuracy extends InputVerifier {
+
+        private final JLabel errorLabel;
+
+        private static final String ERROR_MESSAGE = "Введено неверное значение точности";
+
+        public ValidateAccuracy(JLabel errorLabel) {
+            this.errorLabel = errorLabel;
+        }
+
+        @Override
+        public boolean verify(JComponent input) {
+            JTextField textField = (JTextField) input;
+            String text = textField.getText();
+            if (text != null && !text.trim().equals("")) {
+                double value;
+                try {
+                    value = Double.parseDouble(text.replace(",", "."));
+                } catch (NumberFormatException e) {
+                    errorLabel.setText(ERROR_MESSAGE);
+                    errorLabel.setVisible(true);
+                    return false;
+                }
+                if (value >= 0) {
+                    errorLabel.setVisible(false);
+                    return true;
+                }
+            }
+            errorLabel.setText(ERROR_MESSAGE);
+            errorLabel.setVisible(true);
+            return false;
         }
     }
 }
