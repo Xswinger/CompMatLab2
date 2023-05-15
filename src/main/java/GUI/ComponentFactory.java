@@ -2,50 +2,56 @@ package GUI;
 
 import org.scilab.forge.jlatexmath.TeXConstants;
 import org.scilab.forge.jlatexmath.TeXFormula;
-import org.scilab.forge.jlatexmath.TeXIcon;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 
-public class Tools {
+public class ComponentFactory {
 
-    private static Tools instance = null;
+    private static ComponentFactory instance = null;
 
-    public static Tools getInstance() {
+    public static ComponentFactory getInstance() {
         if (instance == null) {
-            instance = new Tools();
+            instance = new ComponentFactory();
         }
         return instance;
     }
 
-    public final JButton calculateButton = new JButton("Вычислить");
-
     public JPanel createRadioButton(String equation) {
-        TeXFormula formula = new TeXFormula(equation);
-        TeXIcon icon = formula.createTeXIcon(TeXConstants.STYLE_DISPLAY, 10);
         JRadioButton button = new JRadioButton();
 
         JPanel buttonWrapper = new JPanel();
         buttonWrapper.setAlignmentX(JComponent.RIGHT_ALIGNMENT);
         buttonWrapper.add(button);
-        buttonWrapper.add(new JLabel(icon));
+        buttonWrapper.add(new JLabel(getTeXIcon(equation)));
 
         return buttonWrapper;
     }
 
-    public JPanel createControlButtons(ActionListener buttonsListener) {
-        JPanel buttons = new JPanel(new GridLayout(1, 2, 5, 0));
+    public Icon getTeXIcon(String formula) {
+        TeXFormula texFormula = new TeXFormula(formula);
+        return texFormula.createTeXIcon(TeXConstants.STYLE_DISPLAY, 10);
+    }
 
+    public JPanel createControlButtons(ActionListener buttonsListener) {
+        JPanel buttons = new JPanel(new GridLayout(1, 3, 5, 0));
+
+        JButton fileInput = new JButton("Ввести из файла");
+        fileInput.setActionCommand("file");
+
+        JButton calculateButton = new JButton("Вычислить");
         calculateButton.setActionCommand("calculate");
         calculateButton.setEnabled(false);
 
         JButton backButton = new JButton("Назад");
         backButton.setActionCommand("back");
 
+        fileInput.addActionListener(buttonsListener);
         calculateButton.addActionListener(buttonsListener);
         backButton.addActionListener(buttonsListener);
 
+        buttons.add(fileInput);
         buttons.add(calculateButton);
         buttons.add(backButton);
 

@@ -1,7 +1,7 @@
-import GUI.MainFrame;
+import GUI.StartFrame;
 
 public class Manager {
     public static void main(String[] args) {
-        new MainFrame().Frame();
+        new StartFrame().Frame();
     }
 }

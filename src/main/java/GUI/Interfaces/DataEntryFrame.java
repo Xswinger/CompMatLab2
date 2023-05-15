@@ -2,7 +2,7 @@ package GUI.Interfaces;
 
 import javax.swing.*;
 
-public interface ChildFrame extends Frame {
+public interface DataEntryFrame extends Frame {
 
     JPanel createFields();
 

@@ -1,6 +1,6 @@
 package GUI;
 
-import GUI.Interfaces.ChildFrame;
+import GUI.Interfaces.DataEntryFrame;
 import GUI.Interfaces.Frame;
 
 import javax.swing.*;
@@ -8,9 +8,9 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class MainFrame extends JDialog implements Frame {
+public class StartFrame extends JDialog implements Frame {
 
-    private ChildFrame childFrame;
+    private DataEntryFrame childFrame;
 
     private final JFrame parent = new JFrame(TITLE);
 
@@ -18,6 +18,7 @@ public class MainFrame extends JDialog implements Frame {
 
     @Override
     public void Frame() {
+        parent.setTitle(TITLE);
         parent.setIconImage(icon.getImage());
         parent.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         parent.setResizable(false);
@@ -77,10 +78,10 @@ public class MainFrame extends JDialog implements Frame {
         public void actionPerformed(ActionEvent e) {
             switch (e.getActionCommand()) {
                 case "system":
-                    childFrame = new SystemFrame(parent);
+                    childFrame = new SystemsFrame(parent);
                     break;
                 case "equation":
-                    childFrame = new EquationFrame(parent);
+                    childFrame = new EquationsFrame(parent);
                     break;
                 default:
                     break;

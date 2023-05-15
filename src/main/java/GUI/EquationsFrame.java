@@ -1,26 +1,30 @@
 package GUI;
 
-import DefaultData.Equations;
-import EquationData.EquationData;
-import GUI.Interfaces.ChildFrame;
-import Methods.NonLinearEquations.ChordMethod;
-import Methods.NonLinearEquations.NewtonsMethod;
-import Methods.NonLinearEquations.NonlinearEquationMethodInterface;
-import Methods.NonLinearEquations.SimpleIterationMethod;
+import DefaultData.DefaultEquations;
+import GUI.FileInput.Parser;
+import SolutionsData.EquationData;
+import GUI.Interfaces.DataEntryFrame;
+import SolutionMethods.EquationsSolvingMethods.ChordMethod;
+import SolutionMethods.EquationsSolvingMethods.NewtonsMethod;
+import SolutionMethods.EquationsSolvingMethods.EquationSolvingMethodInterface;
+import SolutionMethods.EquationsSolvingMethods.SimpleIterationMethod;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.util.Enumeration;
 import java.util.Objects;
 
 import static javax.swing.GroupLayout.Alignment.*;
 
-public class EquationFrame extends JFrame implements ChildFrame {
+public class EquationsFrame extends JFrame implements DataEntryFrame {
 
     //TODO Разобраться подробнее в методе Ньютона (по поводу начального приближения)
 
-    private static final Tools tool = Tools.getInstance();
+    private static final ComponentFactory tool = ComponentFactory.getInstance();
 
     private final EquationData data = new EquationData();
 
@@ -28,7 +32,11 @@ public class EquationFrame extends JFrame implements ChildFrame {
 
     private static final String HEADER_TEXT = "Решение нелинейных уравнений";
 
-    private static final ButtonGroup group = new ButtonGroup();
+    private final ButtonGroup group = new ButtonGroup();
+
+    private JPanel buttons;
+
+    private JPanel radioButtonsWrapper = new JPanel();
 
     private final JComboBox methodsBox = new JComboBox(methodsNames);
 
@@ -36,11 +44,13 @@ public class EquationFrame extends JFrame implements ChildFrame {
 
     private final JTextField accuracyField = new JTextField("x>0");
 
-    private NonlinearEquationMethodInterface solutionMethod;
+    private EquationSolvingMethodInterface solutionMethod;
 
     private final JFrame parent;
 
-    public EquationFrame(JFrame parent) {
+    private final JFrame frame = this;
+
+    public EquationsFrame(JFrame parent) {
         this.parent = parent;
     }
 
@@ -126,7 +136,7 @@ public class EquationFrame extends JFrame implements ChildFrame {
     @Override
     public JPanel createSolvedObjectChoiceComponent() {
         JPanel wrapper = new JPanel();
-        JPanel radioButtonsWrapper = new JPanel();
+
         radioButtonsWrapper.setLayout(new BoxLayout(radioButtonsWrapper, BoxLayout.Y_AXIS));
         radioButtonsWrapper.setAlignmentX(JComponent.LEFT_ALIGNMENT);
 
@@ -134,10 +144,10 @@ public class EquationFrame extends JFrame implements ChildFrame {
 
         JLabel methodsChoiceTitle = new JLabel("Выберите уравнение:");
 
-        JPanel firstRadioButtonWrapper = tool.createRadioButton(Equations.getFirstEquation());
-        JPanel secondRadioButtonWrapper = tool.createRadioButton(Equations.getSecondEquation());
-        JPanel thirdRadioButtonWrapper = tool.createRadioButton(Equations.getThirdEquation());
-        JPanel fourthRadioButtonWrapper = tool.createRadioButton(Equations.getFourthEquation());
+        JPanel firstRadioButtonWrapper = tool.createRadioButton(DefaultEquations.getFirstEquation());
+        JPanel secondRadioButtonWrapper = tool.createRadioButton(DefaultEquations.getSecondEquation());
+        JPanel thirdRadioButtonWrapper = tool.createRadioButton(DefaultEquations.getThirdEquation());
+        JPanel fourthRadioButtonWrapper = tool.createRadioButton(DefaultEquations.getFourthEquation());
 
         group.add((AbstractButton) firstRadioButtonWrapper.getComponent(0));
         group.add((AbstractButton) secondRadioButtonWrapper.getComponent(0));
@@ -171,7 +181,8 @@ public class EquationFrame extends JFrame implements ChildFrame {
     public void createFilling() {
         getContentPane().add(createHeader(HEADER_TEXT), BorderLayout.NORTH);
         getContentPane().add(createContent(), BorderLayout.CENTER);
-        getContentPane().add(tool.createControlButtons(new ButtonPressListener()), BorderLayout.SOUTH);
+        buttons = tool.createControlButtons(new ButtonPressListener());
+        getContentPane().add(buttons, BorderLayout.SOUTH);
     }
 
     @Override
@@ -187,6 +198,85 @@ public class EquationFrame extends JFrame implements ChildFrame {
         return headerPanel;
     }
 
+    private File chooseFile() {
+        JFileChooser chooser = new JFileChooser();
+
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Only csv files", "csv");
+
+        chooser.setFileFilter(filter);
+        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+        int ret = chooser.showDialog(null, "Выбрать файл");
+
+        File file = null;
+
+        if (ret == JFileChooser.APPROVE_OPTION) {
+            file = chooser.getSelectedFile();
+        }
+
+        chooser.setVisible(true);
+
+        return file;
+    }
+
+    private String getEquationName() {
+        int numberOfSelectedButton = 0;
+        Enumeration<AbstractButton> buttons = group.getElements();
+        while (buttons.hasMoreElements()) {
+            AbstractButton button = buttons.nextElement();
+            if (button.isSelected()) {
+                break;
+            }
+            numberOfSelectedButton++;
+        }
+        switch (numberOfSelectedButton) {
+            case 0 -> {
+                return "FIRST_EQUATION";
+            }
+            case 1 -> {
+                return "SECOND_EQUATION";
+            }
+            case 2 -> {
+                return "THIRD_EQUATION";
+            }
+            case 3 -> {
+                return "FOURTH_EQUATION";
+            }
+            default -> {
+                return null;
+            }
+        }
+    }
+
+    private String getEquation() {
+        int numberOfSelectedButton = 0;
+        Enumeration<AbstractButton> buttons = group.getElements();
+        while (buttons.hasMoreElements()) {
+            AbstractButton button = buttons.nextElement();
+            if (button.isSelected()) {
+                break;
+            }
+            numberOfSelectedButton++;
+        }
+        switch (numberOfSelectedButton) {
+            case 0 -> {
+                return DefaultEquations.getFirstEquation();
+            }
+            case 1 -> {
+                return DefaultEquations.getSecondEquation();
+            }
+            case 2 -> {
+                return DefaultEquations.getThirdEquation();
+            }
+            case 3 -> {
+                return DefaultEquations.getFourthEquation();
+            }
+            default -> {
+                return null;
+            }
+        }
+    }
+
     private class ButtonPressListener implements ActionListener {
 
         @Override
@@ -195,12 +285,25 @@ public class EquationFrame extends JFrame implements ChildFrame {
 
             } else {
                 switch (e.getActionCommand()) {
+                    case "file" -> {
+                        Parser parser = new Parser(chooseFile());
+                        String[] parseData = parser.parseData();
+                        bordersField.setText(parseData[0].trim() + ";" + parseData[1].trim());
+                        accuracyField.setText(parseData[2].trim());
+                        ((JPanel) buttons.getComponent(0)).getComponent(1).setEnabled(true);
+                    }
                     case "calculate" -> {
+                        data.setEquationName(getEquationName());
+                        data.setEquationView(getEquation());
                         data.setLeftBorder(Double.parseDouble(bordersField.getText().replace(",", ".").split(";")[0]));
                         data.setRightBorder(Double.parseDouble(bordersField.getText().replace(",", ".").split(";")[1]));
-                        data.setAccuracy(Double.parseDouble(accuracyField.getText()));
+                        data.setAccuracy(Double.parseDouble(accuracyField.getText().replace(",", ".")));
                         solutionMethod = getSelectionMethod((String) Objects.requireNonNull(methodsBox.getSelectedItem()));
-                        solutionMethod.iterationsCycle(data);
+                        String[] solution = solutionMethod.iterationsCycle();
+                        SolutionFrame solutionFrame = new SolutionFrame(data, frame);
+                        solutionFrame.setSolution(solution);
+                        solutionFrame.Frame();
+                        dispose();
                     }
                     case "back" -> {
                         dispose();
@@ -216,11 +319,11 @@ public class EquationFrame extends JFrame implements ChildFrame {
             return true;
         }
 
-        private <T extends NonlinearEquationMethodInterface> NonlinearEquationMethodInterface getSelectionMethod(String methodName) {
+        private <T extends EquationSolvingMethodInterface> EquationSolvingMethodInterface getSelectionMethod(String methodName) {
             return switch (methodName) {
-                case ChordMethod.METHOD_NAME -> new ChordMethod();
-                case NewtonsMethod.METHOD_NAME -> new NewtonsMethod();
-                case SimpleIterationMethod.METHOD_NAME -> new SimpleIterationMethod();
+                case ChordMethod.METHOD_NAME -> new ChordMethod(data);
+                case NewtonsMethod.METHOD_NAME -> new NewtonsMethod(data);
+                case SimpleIterationMethod.METHOD_NAME -> new SimpleIterationMethod(data);
                 default -> null;
             };
         }
@@ -248,7 +351,7 @@ public class EquationFrame extends JFrame implements ChildFrame {
                     rightBorder = Double.parseDouble(values[0]);
                     leftBorder = Double.parseDouble(values[1]);
                 } catch (NumberFormatException e) {
-                    tool.calculateButton.setEnabled(false);
+                    ((JPanel) buttons.getComponent(0)).getComponent(1).setEnabled(false);
                     errorLabel.setText(ERROR_MESSAGE);
                     errorLabel.setVisible(true);
                     return false;
@@ -257,11 +360,11 @@ public class EquationFrame extends JFrame implements ChildFrame {
                     errorLabel.setVisible(false);
                 }
                 if (accuracyField.isValidateRoot()) {
-                    tool.calculateButton.setEnabled(true);
+                    ((JPanel) buttons.getComponent(0)).getComponent(1).setEnabled(true);
                 }
                 return true;
             }
-            tool.calculateButton.setEnabled(false);
+            ((JPanel) buttons.getComponent(0)).getComponent(1).setEnabled(false);
             errorLabel.setText(ERROR_MESSAGE);
             errorLabel.setVisible(true);
             return false;
@@ -287,7 +390,7 @@ public class EquationFrame extends JFrame implements ChildFrame {
                 try {
                     value = Double.parseDouble(text.replace(",", "."));
                 } catch (NumberFormatException e) {
-                    tool.calculateButton.setEnabled(false);
+                    ((JPanel) buttons.getComponent(0)).getComponent(1).setEnabled(false);
                     errorLabel.setText(ERROR_MESSAGE);
                     errorLabel.setVisible(true);
                     return false;
@@ -296,11 +399,11 @@ public class EquationFrame extends JFrame implements ChildFrame {
                     errorLabel.setVisible(false);
                 }
                 if (bordersField.isValidateRoot()) {
-                    tool.calculateButton.setEnabled(true);
+                    ((JPanel) buttons.getComponent(0)).getComponent(1).setEnabled(true);
                 }
                 return true;
             }
-            tool.calculateButton.setEnabled(false);
+            ((JPanel) buttons.getComponent(0)).getComponent(1).setEnabled(false);
             errorLabel.setText(ERROR_MESSAGE);
             errorLabel.setVisible(true);
             return false;
